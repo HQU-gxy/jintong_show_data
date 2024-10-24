@@ -4,6 +4,7 @@ import {computed, onMounted} from "vue";
 import {getData} from "../api/user.ts";
 import {testData} from "../../test/test_data.ts";
 import {GSM2GCellInfo} from "../model/entity.ts";
+import BarChart from "./BarChart.vue";
 
 const tableData = [
   {
@@ -37,6 +38,7 @@ const GSM2GCellInfos = computed(() => {
     let idx = parseInt(item.lable.slice(3, 4), 16)
     if (result[idx] === null) {
       result[idx] = {
+        idx: idx,
         PLMN: undefined,
         Lac: undefined,
         Bsic: undefined,
@@ -62,15 +64,13 @@ const GSM2GCellInfos = computed(() => {
 
 onMounted(
     async () => {
-      let result = await getData({
-        tableCategory: '2',
-        stationNo: '20241019',
-        deviceNo: 'ff',
-        order: 'ff',
-      })
-      console.log(result)
-      // console.log(reuslt.value)
-      // const result: GSM2GCellInfo[] = new Array(16).fill(GSM2GCellInfo);
+      // let result = await getData({
+      //   tableCategory: '2',
+      //   stationNo: '20241019',
+      //   deviceNo: 'ff',
+      //   order: 'ff',
+      // })
+      // console.log(result)
       // console.log(result)
     }
 )
@@ -78,6 +78,10 @@ onMounted(
 
 <template>
   <h2>GSM_2G_Cell_Info</h2>
+  <div style="height: 400px">
+    <BarChart :source="GSM2GCellInfos.map(item => ({idx: item?.idx, RxLev: item?.Rxlev?.value}))"
+              :dimensions="['idx', 'RxLev']"></BarChart>
+  </div>
   <el-table :data="GSM2GCellInfos" border style="width: 100%">
     <el-table-column prop="PLMN" label="PLMN">
       <template #default="scope">
@@ -105,6 +109,7 @@ onMounted(
       </template>
     </el-table-column>
   </el-table>
+
   <h2>GSM_3G_Cell_Info</h2>
   <el-table :data="tableData" border style="width: 100%">
     <el-table-column prop="name" label="PLMN"/>

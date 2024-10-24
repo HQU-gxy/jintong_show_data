@@ -19,6 +19,7 @@ export interface DataCell {
 }
 
 export interface GSM2GCellInfo {
+    idx?: number,
     PLMN?: DataCell,
     Lac?: DataCell,
     Bsic?: DataCell,
@@ -27,6 +28,7 @@ export interface GSM2GCellInfo {
 }
 
 export interface GSM3GCellInfo {
+    idx?: number,
     PLMN?: DataCell,
     Lac?: DataCell,
     Bsic?: DataCell,
