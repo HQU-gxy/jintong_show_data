@@ -40,6 +40,7 @@ export interface GSM3GCellInfo {
 }
 
 export interface GSM4GCellInfo {
+    idx?: number,
     PLMN?: DataCell,
     CellID?: DataCell,
     pcid?: DataCell,
@@ -49,6 +50,7 @@ export interface GSM4GCellInfo {
 }
 
 export interface NR5G4GCellInfo {
+    idx?: number,
     PLMN?: DataCell,
     Band?: DataCell,
     Arfcn?: DataCell,
@@ -58,6 +60,7 @@ export interface NR5G4GCellInfo {
 }
 
 export interface WIFI_Cell_Info {
+    idx?: number,
     CH?: DataCell,
     SSID?: DataCell,
     BSSID?: DataCell,

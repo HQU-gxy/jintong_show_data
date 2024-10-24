@@ -1,8 +1,6 @@
 import service from '../http/request'
-import { Result } from '../model/entity'
+import {DataCell, Result} from '../model/entity'
 
-export function getData(data: unknown) {
-  return service.post<any, Array<any>>('/stations/equipDataList', {
-    params: data
-  })
+export function getData(stationNo: string, deviceNo: string, ) {
+  return service.post<any, Array<DataCell>>(`/stations/equipDataList?tableCategory=2&stationNo=${stationNo}&deviceNo=${deviceNo}`, {})
 }

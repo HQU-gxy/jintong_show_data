@@ -34,7 +34,7 @@ type EChartsOption = ComposeOption<
     | BarSeriesOption
 >
 import VChart from 'vue-echarts'
-import {computed, ref} from "vue";
+import {computed, onMounted, ref, watchEffect} from "vue";
 
 const props = defineProps({
   dimensions: {
@@ -46,26 +46,24 @@ const props = defineProps({
     default: () => []
   }
 })
-const dataSource = computed(() => {
-  return props.source
-})
-const dataDimensions = computed(() => {
-  return props.dimensions
-})
+const dataSource = computed(() => props.source)
+const dataDimensions = computed(() => props.dimensions)
 
-const option = {
-  legend: {},
-  tooltip: {},
-  dataset: {
-    dimensions: props.dimensions,
-    source: props.source,
-  },
-  xAxis: {type: 'category'},
-  yAxis: {},
-  // Declare several bar series, each will be mapped
-  // to a column of dataset.source by default.
-  series: [{type: 'bar'}]
-}
+const option = ref(
+    {
+      legend: {},
+      tooltip: {},
+      dataset: {
+        dimensions: dataDimensions,
+        source: dataSource,
+      },
+      xAxis: {type: 'category'},
+      yAxis: {},
+      // Declare several bar series, each will be mapped
+      // to a column of dataset.source by default.
+      series: [{type: 'bar'}]
+    }
+)
 
 console.log(option)
 </script>

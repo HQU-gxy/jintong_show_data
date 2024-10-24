@@ -1,11 +1,15 @@
 <script setup lang="ts">
 
-import {computed, onMounted} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {getData} from "../api/user.ts";
 import {testData} from "../../test/test_data.ts";
-import {GSM2GCellInfo} from "../model/entity.ts";
+import {DataCell, GSM2GCellInfo} from "../model/entity.ts";
 import BarChart from "./BarChart.vue";
+import PDInput from "./SearchPane/PDInput.vue";
+import SearchPane from "./SearchPane/SearchPane.vue";
+import SearchItem from "./SearchPane/SearchItem.vue";
 
+const apiData = ref<DataCell[]>([])
 const tableData = [
   {
     date: '2016-05-03',
@@ -29,11 +33,11 @@ const tableData = [
   },
 ]
 const rawData = testData
-const GSM2GCellInfoLabels = ['051', '052', '053', '054', '055', '056']
-const GSM2GCellInfos = computed(() => {
-  // let result: GSM2GCellInfo[] = []
+const GSM2GCellInfos = ref<GSM2GCellInfo[]>([])
+const GSM2GCellChartInfos = ref<any[]>([])
+const getGSM2GCellInfos = () => {
   const result: (GSM2GCellInfo | null)[] = new Array(16).fill(null);
-  for (const item of rawData) {
+  for (const item of apiData.value) {
     let prefix = item.lable.slice(0, 3);
     let idx = parseInt(item.lable.slice(3, 4), 16)
     if (result[idx] === null) {
@@ -58,10 +62,13 @@ const GSM2GCellInfos = computed(() => {
       result[idx].Rxlev = item;
     }
   }
+  GSM2GCellChartInfos.value = result.map(item => ({idx: item?.idx, RxLev: item?.Rxlev?.value}))
 
   return result
-})
+}
 
+const stationNo = ref('')
+const deviceNo = ref('')
 onMounted(
     async () => {
       // let result = await getData({
@@ -74,12 +81,25 @@ onMounted(
       // console.log(result)
     }
 )
+const searchDev = async () => {
+  let result = await getData(stationNo.value, deviceNo.value)
+  apiData.value = result
+  GSM2GCellInfos.value = getGSM2GCellInfos() || []
+}
 </script>
 
 <template>
+  <SearchPane @search="searchDev">
+    <SearchItem>
+      <PDInput v-model="stationNo" description="站点号" placeholder="请输入站点号"></PDInput>
+    </SearchItem>
+    <SearchItem>
+      <PDInput v-model="deviceNo" description="设备号" placeholder="请输入设备号"></PDInput>
+    </SearchItem>
+  </SearchPane>
   <h2>GSM_2G_Cell_Info</h2>
   <div style="height: 400px">
-    <BarChart :source="GSM2GCellInfos.map(item => ({idx: item?.idx, RxLev: item?.Rxlev?.value}))"
+    <BarChart :source="GSM2GCellChartInfos"
               :dimensions="['idx', 'RxLev']"></BarChart>
   </div>
   <el-table :data="GSM2GCellInfos" border style="width: 100%">
