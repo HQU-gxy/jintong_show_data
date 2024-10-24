@@ -37,7 +37,7 @@ const GSM2GCellInfos = ref<GSM2GCellInfo[]>([])
 const GSM2GCellChartInfos = ref<any[]>([])
 const getGSM2GCellInfos = () => {
   const result: (GSM2GCellInfo | null)[] = new Array(16).fill(null);
-  for (const item of apiData.value) {
+  for (const item of rawData) {
     let prefix = item.lable.slice(0, 3);
     let idx = parseInt(item.lable.slice(3, 4), 16)
     if (result[idx] === null) {
@@ -62,6 +62,8 @@ const getGSM2GCellInfos = () => {
       result[idx].Rxlev = item;
     }
   }
+  // @ts-ignore can assign
+  GSM2GCellInfos.value = result
   GSM2GCellChartInfos.value = result.map(item => ({idx: item?.idx, RxLev: item?.Rxlev?.value}))
 
   return result
@@ -82,9 +84,9 @@ onMounted(
     }
 )
 const searchDev = async () => {
-  let result = await getData(stationNo.value, deviceNo.value)
-  apiData.value = result
-  GSM2GCellInfos.value = getGSM2GCellInfos() || []
+  // let result = await getData(stationNo.value, deviceNo.value)
+  // apiData.value = result
+  getGSM2GCellInfos() || []
 }
 </script>
 
