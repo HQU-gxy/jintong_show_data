@@ -6,7 +6,8 @@ import { getToken, resetToken } from '../util/auth'
 // 创建axios实例
 const service = axios.create({
   // 服务接口请求
-  baseURL: `http://localhost:8080`,
+  // baseURL: `http://localhost:8085`,
+    baseURL: `/api`,
   // 超时设置
   // timeout: 15000,
   headers: { 'Content-Type': 'application/json;charset=utf-8' }

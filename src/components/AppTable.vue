@@ -59,9 +59,16 @@ const GSM2GCellInfos = computed(() => {
 
   return result
 })
+
 onMounted(
     async () => {
-      // let result = await getData({})
+      let result = await getData({
+        tableCategory: '2',
+        stationNo: '20241019',
+        deviceNo: 'ff',
+        order: 'ff',
+      })
+      console.log(result)
       // console.log(reuslt.value)
       // const result: GSM2GCellInfo[] = new Array(16).fill(GSM2GCellInfo);
       // console.log(result)
