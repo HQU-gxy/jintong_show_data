@@ -547,10 +547,15 @@ onMounted(() => {
   )
 })
 
+const reset = () => {
+  stationNo.value = ''
+  deviceNo.value = ''
+}
+
 </script>
 
 <template>
-  <SearchPane @search="searchDev">
+  <SearchPane @search="searchDev" @reset="reset">
     <template v-slot:btn>
       <el-select style="width: 150px" v-model="refreshMode" placeholder="请选择">
         <el-option v-for="item in refreshOpt" :key="item.value" :label="item.label" :value="item.value">
