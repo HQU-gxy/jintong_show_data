@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watchEffect} from "vue";
 import {getData} from "../api/user.ts";
 import {testData} from "../../test/test_data.ts";
 import {
@@ -17,39 +17,18 @@ import SearchPane from "./SearchPane/SearchPane.vue";
 import SearchItem from "./SearchPane/SearchItem.vue";
 
 const apiData = ref<DataCell[]>([])
-const tableData = [
-  {
-    date: '2016-05-03',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-02',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-04',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-01',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-]
 const rawData = testData
 const GSM2GCellInfos = ref<GSM2GCellInfo[]>([])
 const GSM2GCellChartInfos = ref<any[]>([])
 const getGSM2GCellInfos = () => {
   const result: (GSM2GCellInfo | null)[] = new Array(16).fill(null);
-  for (const item of rawData) {
+  for (const item of apiData.value) {
     let prefix = item.lable.slice(0, 3);
     let idx = parseInt(item.lable.slice(3, 4), 16)
     if (result[idx] === null) {
       result[idx] = {
         idx: idx,
+        time: undefined,
         PLMN: undefined,
         Lac: undefined,
         Bsic: undefined,
@@ -57,17 +36,65 @@ const getGSM2GCellInfos = () => {
         Rxlev: undefined,
       };
     }
+    const itemTimestamp = new Date(item.timestamp ?? 0);
+    let latestTimestamp = result[idx].time ? new Date(result[idx].time) : null;
+
+    // 处理 PLMN
     if (prefix === '051') {
-      result[idx].PLMN = item;
-    } else if (prefix === '052') {
-      result[idx].Lac = item;
-    } else if (prefix === '053') {
-      result[idx].Bsic = item;
-    } else if (prefix === '054') {
-      result[idx].Arfcn = item;
-    } else if (prefix === '055') {
-      result[idx].Rxlev = item;
+      const existingPLMN = result[idx].PLMN;
+      if (!existingPLMN || !existingPLMN.timestamp || itemTimestamp > new Date(existingPLMN.timestamp)) {
+        result[idx].PLMN = item;
+        latestTimestamp = itemTimestamp
+      }
     }
+
+    // 处理 Lac
+    if (prefix === '052') {
+      const existingLac = result[idx].Lac;
+      if (!existingLac || !existingLac.timestamp || itemTimestamp > new Date(existingLac.timestamp)) {
+        result[idx].Lac = item;
+        latestTimestamp = itemTimestamp
+      }
+    }
+
+    // 处理 Bsic
+    if (prefix === '053') {
+      const existingBsic = result[idx].Bsic;
+      if (!existingBsic || !existingBsic.timestamp || itemTimestamp > new Date(existingBsic.timestamp)) {
+        result[idx].Bsic = item;
+        latestTimestamp = itemTimestamp
+      }
+    }
+
+    // 处理 Arfcn
+    if (prefix === '054') {
+      const existingArfcn = result[idx].Arfcn;
+      if (!existingArfcn || !existingArfcn.timestamp || itemTimestamp > new Date(existingArfcn.timestamp)) {
+        result[idx].Arfcn = item;
+        latestTimestamp = itemTimestamp
+      }
+    }
+
+    // 处理 Rxlev
+    if (prefix === '055') {
+      const existingRxlev = result[idx].Rxlev;
+      if (!existingRxlev || !existingRxlev.timestamp || itemTimestamp > new Date(existingRxlev.timestamp)) {
+        result[idx].Rxlev = item;
+        latestTimestamp = itemTimestamp
+      }
+    }
+    result[idx].time = latestTimestamp ? latestTimestamp.toLocaleString() : undefined;
+    // if (prefix === '051') {
+    //   result[idx].PLMN = item;
+    // } else if (prefix === '052') {
+    //   result[idx].Lac = item;
+    // } else if (prefix === '053') {
+    //   result[idx].Bsic = item;
+    // } else if (prefix === '054') {
+    //   result[idx].Arfcn = item;
+    // } else if (prefix === '055') {
+    //   result[idx].Rxlev = item;
+    // }
   }
   // @ts-ignore can assign
   GSM2GCellInfos.value = result
@@ -80,7 +107,7 @@ const GSM3GCellInfos = ref<GSM3GCellInfo[]>([])
 const GSM3GCellChartInfos = ref<any[]>([])
 const getGSM3GCellInfos = () => {
   const result: (GSM3GCellInfo | null)[] = new Array(16).fill(null);
-  for (const item of rawData) {
+  for (const item of apiData.value) {
     let prefix = item.lable.slice(0, 3);
     let idx = parseInt(item.lable.slice(3, 4), 16)
     if (result[idx] === null) {
@@ -95,21 +122,86 @@ const getGSM3GCellInfos = () => {
         Ecno: undefined,
       };
     }
+    const itemTimestamp = new Date(item.timestamp ?? 0);
+    let latestTimestamp = result[idx].time ? new Date(result[idx].time) : null;
+    // 处理 PLMN
     if (prefix === '057') {
-      result[idx].PLMN = item;
-    } else if (prefix === '058') {
-      result[idx].Lac = item;
-    } else if (prefix === '059') {
-      result[idx].CellID = item;
-    } else if (prefix === '05A') {
-      result[idx].Arfcn = item;
-    } else if (prefix === '05B') {
-      result[idx].Psc = item;
-    } else if (prefix === '05C') {
-      result[idx].Rscp = item;
-    } else if (prefix === '05D') {
-      result[idx].Ecno = item;
+      const existingPLMN = result[idx].PLMN;
+      if (!existingPLMN || !existingPLMN.timestamp || itemTimestamp > new Date(existingPLMN.timestamp)) {
+        result[idx].PLMN = item;
+        latestTimestamp = itemTimestamp
+      }
     }
+
+    // 处理 Lac
+    if (prefix === '058') {
+      const existingLac = result[idx].Lac;
+      if (!existingLac || !existingLac.timestamp || itemTimestamp > new Date(existingLac.timestamp)) {
+        result[idx].Lac = item;
+        latestTimestamp = itemTimestamp
+      }
+    }
+
+    // 处理 CellID
+    if (prefix === '059') {
+      const existingCellID = result[idx].CellID;
+      if (!existingCellID || !existingCellID.timestamp || itemTimestamp > new Date(existingCellID.timestamp)) {
+        result[idx].CellID = item;
+        latestTimestamp = itemTimestamp
+      }
+    }
+
+    // 处理 Arfcn
+    if (prefix === '05A') {
+      const existingArfcn = result[idx].Arfcn;
+      if (!existingArfcn || !existingArfcn.timestamp || itemTimestamp > new Date(existingArfcn.timestamp)) {
+        result[idx].Arfcn = item;
+        latestTimestamp = itemTimestamp
+      }
+    }
+
+    // 处理 Psc
+    if (prefix === '05B') {
+      const existingPsc = result[idx].Psc;
+      if (!existingPsc || !existingPsc.timestamp || itemTimestamp > new Date(existingPsc.timestamp)) {
+        result[idx].Psc = item;
+        latestTimestamp = itemTimestamp
+      }
+    }
+
+    // 处理 Rscp
+    if (prefix === '05C') {
+      const existingRscp = result[idx].Rscp;
+      if (!existingRscp || !existingRscp.timestamp || itemTimestamp > new Date(existingRscp.timestamp)) {
+        result[idx].Rscp = item;
+        latestTimestamp = itemTimestamp
+      }
+    }
+
+    // 处理 Ecno
+    if (prefix === '05D') {
+      const existingEcno = result[idx].Ecno;
+      if (!existingEcno || !existingEcno.timestamp || itemTimestamp > new Date(existingEcno.timestamp)) {
+        result[idx].Ecno = item;
+        latestTimestamp = itemTimestamp
+      }
+    }
+    // if (prefix === '057') {
+    //   result[idx].PLMN = item;
+    // } else if (prefix === '058') {
+    //   result[idx].Lac = item;
+    // } else if (prefix === '059') {
+    //   result[idx].CellID = item;
+    // } else if (prefix === '05A') {
+    //   result[idx].Arfcn = item;
+    // } else if (prefix === '05B') {
+    //   result[idx].Psc = item;
+    // } else if (prefix === '05C') {
+    //   result[idx].Rscp = item;
+    // } else if (prefix === '05D') {
+    //   result[idx].Ecno = item;
+    // }
+    result[idx].time = latestTimestamp ? latestTimestamp.toLocaleString() : undefined;
   }
   // @ts-ignore can assign
   GSM3GCellInfos.value = result
@@ -123,7 +215,7 @@ const GSM4GCellInfos = ref<GSM4GCellInfo[]>([])
 const GSM4GCellChartInfos = ref<any[]>([])
 const getGSM4GCellInfos = () => {
   const result: (GSM4GCellInfo | null)[] = new Array(16).fill(null);
-  for (const item of rawData) {
+  for (const item of apiData.value) {
     let prefix = item.lable.slice(0, 3);
     let idx = parseInt(item.lable.slice(3, 4), 16)
     if (result[idx] === null) {
@@ -137,19 +229,79 @@ const getGSM4GCellInfos = () => {
         Rsrq: undefined,
       };
     }
+    // 解析当前 item 的时间戳
+    const itemTimestamp = new Date(item.timestamp ?? 0);
+
+    // 记录最新的时间戳
+    let latestTimestamp = result[idx].time ? new Date(result[idx].time) : null;
+
+    // 处理 PLMN
     if (prefix === '05E') {
-      result[idx].PLMN = item;
-    } else if (prefix === '05F') {
-      result[idx].CellID = item;
-    } else if (prefix === '060') {
-      result[idx].pcid = item;
-    } else if (prefix === '061') {
-      result[idx].Arfcn = item;
-    } else if (prefix === '062') {
-      result[idx].Rsrp = item;
-    } else if (prefix === '063') {
-      result[idx].Rsrq = item;
+      const existingPLMN = result[idx].PLMN;
+      if (!existingPLMN || !existingPLMN.timestamp || itemTimestamp > new Date(existingPLMN.timestamp)) {
+        result[idx].PLMN = item;
+        latestTimestamp = itemTimestamp;
+      }
     }
+
+    // 处理 CellID
+    if (prefix === '05F') {
+      const existingCellID = result[idx].CellID;
+      if (!existingCellID || !existingCellID.timestamp || itemTimestamp > new Date(existingCellID.timestamp)) {
+        result[idx].CellID = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 pcid
+    if (prefix === '060') {
+      const existingPcid = result[idx].pcid;
+      if (!existingPcid || !existingPcid.timestamp || itemTimestamp > new Date(existingPcid.timestamp)) {
+        result[idx].pcid = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 Arfcn
+    if (prefix === '061') {
+      const existingArfcn = result[idx].Arfcn;
+      if (!existingArfcn || !existingArfcn.timestamp || itemTimestamp > new Date(existingArfcn.timestamp)) {
+        result[idx].Arfcn = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 Rsrp
+    if (prefix === '062') {
+      const existingRsrp = result[idx].Rsrp;
+      if (!existingRsrp || !existingRsrp.timestamp || itemTimestamp > new Date(existingRsrp.timestamp)) {
+        result[idx].Rsrp = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 Rsrq
+    if (prefix === '063') {
+      const existingRsrq = result[idx].Rsrq;
+      if (!existingRsrq || !existingRsrq.timestamp || itemTimestamp > new Date(existingRsrq.timestamp)) {
+        result[idx].Rsrq = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+    result[idx].time = latestTimestamp ? latestTimestamp.toLocaleString() : undefined;
+    // if (prefix === '05E') {
+    //   result[idx].PLMN = item;
+    // } else if (prefix === '05F') {
+    //   result[idx].CellID = item;
+    // } else if (prefix === '060') {
+    //   result[idx].pcid = item;
+    // } else if (prefix === '061') {
+    //   result[idx].Arfcn = item;
+    // } else if (prefix === '062') {
+    //   result[idx].Rsrp = item;
+    // } else if (prefix === '063') {
+    //   result[idx].Rsrq = item;
+    // }
   }
   // @ts-ignore can assign
   GSM4GCellInfos.value = result
@@ -162,7 +314,7 @@ const NR5G4GCellInfos = ref<NR5G4GCellInfo[]>([])
 const NR5GCellChartInfos = ref<any[]>([])
 const getNR5G4GCellInfos = () => {
   const result: (NR5G4GCellInfo | null)[] = new Array(16).fill(null);
-  for (const item of rawData) {
+  for (const item of apiData.value) {
     let prefix = item.lable.slice(0, 3);
     let idx = parseInt(item.lable.slice(3, 4), 16)
     if (result[idx] === null) {
@@ -176,21 +328,92 @@ const getNR5G4GCellInfos = () => {
         Sinr: undefined,
       };
     }
+    // 解析当前 item 的时间戳
+    const itemTimestamp = new Date(item.timestamp ?? 0);
+
+    // 记录最新的时间戳
+    let latestTimestamp = result[idx].time ? new Date(result[idx].time) : null;
+
+    // 处理 PLMN
     if (prefix === '064') {
-      result[idx].PLMN = item;
-    } else if (prefix === '065') {
-      result[idx].Band = item;
-    } else if (prefix === '066') {
-      result[idx].Arfcn = item;
-    } else if (prefix === '067') {
-      result[idx].Pcid = item;
-    } else if (prefix === '068') {
-      result[idx].Rsrp = item;
-    } else if (prefix === '069') {
-      result[idx].Rsrq = item;
-    } else if (prefix === '06A') {
-      result[idx].Sinr = item;
+      const existingPLMN = result[idx].PLMN;
+      if (!existingPLMN || !existingPLMN.timestamp || itemTimestamp > new Date(existingPLMN.timestamp)) {
+        result[idx].PLMN = item;
+        latestTimestamp = itemTimestamp;
+      }
     }
+
+    // 处理 Band
+    if (prefix === '065') {
+      const existingBand = result[idx].Band;
+      if (!existingBand || !existingBand.timestamp || itemTimestamp > new Date(existingBand.timestamp)) {
+        result[idx].Band = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 Arfcn
+    if (prefix === '066') {
+      const existingArfcn = result[idx].Arfcn;
+      if (!existingArfcn || !existingArfcn.timestamp || itemTimestamp > new Date(existingArfcn.timestamp)) {
+        result[idx].Arfcn = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 Pcid
+    if (prefix === '067') {
+      const existingPcid = result[idx].Pcid;
+      if (!existingPcid || !existingPcid.timestamp || itemTimestamp > new Date(existingPcid.timestamp)) {
+        result[idx].Pcid = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 Rsrp
+    if (prefix === '068') {
+      const existingRsrp = result[idx].Rsrp;
+      if (!existingRsrp || !existingRsrp.timestamp || itemTimestamp > new Date(existingRsrp.timestamp)) {
+        result[idx].Rsrp = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 Rsrq
+    if (prefix === '069') {
+      const existingRsrq = result[idx].Rsrq;
+      if (!existingRsrq || !existingRsrq.timestamp || itemTimestamp > new Date(existingRsrq.timestamp)) {
+        result[idx].Rsrq = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 Sinr
+    if (prefix === '06A') {
+      const existingSinr = result[idx].Sinr;
+      if (!existingSinr || !existingSinr.timestamp || itemTimestamp > new Date(existingSinr.timestamp)) {
+        result[idx].Sinr = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 更新 result[idx].time 为最新的时间戳
+    result[idx].time = latestTimestamp ? latestTimestamp.toLocaleString() : undefined;
+    // if (prefix === '064') {
+    //   result[idx].PLMN = item;
+    // } else if (prefix === '065') {
+    //   result[idx].Band = item;
+    // } else if (prefix === '066') {
+    //   result[idx].Arfcn = item;
+    // } else if (prefix === '067') {
+    //   result[idx].Pcid = item;
+    // } else if (prefix === '068') {
+    //   result[idx].Rsrp = item;
+    // } else if (prefix === '069') {
+    //   result[idx].Rsrq = item;
+    // } else if (prefix === '06A') {
+    //   result[idx].Sinr = item;
+    // }
   }
   // @ts-ignore can assign
   NR5G4GCellInfos.value = result
@@ -203,7 +426,7 @@ const WIFI_Cell_Infos = ref<WIFI_Cell_Info[]>([])
 const WIFI_Cell_ChartInfos = ref<any[]>([])
 const getWIFI_Cell_Infos = () => {
   const result: (WIFI_Cell_Info | null)[] = new Array(16).fill(null);
-  for (const item of rawData) {
+  for (const item of apiData.value) {
     let prefix = item.lable.slice(0, 3);
     let idx = parseInt(item.lable.slice(3, 4), 16)
     if (result[idx] === null) {
@@ -215,15 +438,59 @@ const getWIFI_Cell_Infos = () => {
         Indicator: undefined,
       };
     }
+    // 解析当前 item 的时间戳
+    const itemTimestamp = new Date(item.timestamp??0);
+
+    // 记录最新的时间戳
+    let latestTimestamp = result[idx].time ? new Date(result[idx].time) : null;
+
+    // 处理 CH
     if (prefix === '06B') {
-      result[idx].CH = item;
-    } else if (prefix === '06C') {
-      result[idx].SSID = item;
-    } else if (prefix === '06D') {
-      result[idx].BSSID = item;
-    } else if (prefix === '06E') {
-      result[idx].Indicator = item;
+      const existingCH = result[idx].CH;
+      if (!existingCH || !existingCH.timestamp || itemTimestamp > new Date(existingCH.timestamp)) {
+        result[idx].CH = item;
+        latestTimestamp = itemTimestamp;
+      }
     }
+
+    // 处理 SSID
+    if (prefix === '06C') {
+      const existingSSID = result[idx].SSID;
+      if (!existingSSID || !existingSSID.timestamp || itemTimestamp > new Date(existingSSID.timestamp)) {
+        result[idx].SSID = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 BSSID
+    if (prefix === '06D') {
+      const existingBSSID = result[idx].BSSID;
+      if (!existingBSSID || !existingBSSID.timestamp || itemTimestamp > new Date(existingBSSID.timestamp)) {
+        result[idx].BSSID = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 处理 Indicator
+    if (prefix === '06E') {
+      const existingIndicator = result[idx].Indicator;
+      if (!existingIndicator || !existingIndicator.timestamp || itemTimestamp > new Date(existingIndicator.timestamp)) {
+        result[idx].Indicator = item;
+        latestTimestamp = itemTimestamp;
+      }
+    }
+
+    // 更新 result[idx].time 为最新的时间戳
+    result[idx].time = latestTimestamp ? latestTimestamp.toLocaleString() : undefined;
+    // if (prefix === '06B') {
+    //   result[idx].CH = item;
+    // } else if (prefix === '06C') {
+    //   result[idx].SSID = item;
+    // } else if (prefix === '06D') {
+    //   result[idx].BSSID = item;
+    // } else if (prefix === '06E') {
+    //   result[idx].Indicator = item;
+    // }
   }
   // @ts-ignore can assign
   WIFI_Cell_Infos.value = result
@@ -247,18 +514,49 @@ onMounted(
     }
 )
 const searchDev = async () => {
-  // let result = await getData(stationNo.value, deviceNo.value)
-  // apiData.value = result
+  let result = await getData(stationNo.value, deviceNo.value)
+  apiData.value = result
+  console.log('search dev')
   getGSM2GCellInfos()
   getGSM3GCellInfos()
   getGSM4GCellInfos()
   getNR5G4GCellInfos()
   getWIFI_Cell_Infos()
 }
+
+const refreshMode = ref(0)
+const refreshOpt = [
+  {label: '手动刷新', value: 0},
+  {label: '自动刷新/1s', value: 1},
+  {label: '自动刷新/5s', value: 2},
+  {label: '自动刷新/10s', value: 3},
+]
+const searchInterval = ref()
+onMounted(() => {
+  watchEffect(
+      () => {
+        clearInterval(searchInterval.value)
+        if (refreshMode.value === 1) {
+          searchInterval.value = setInterval(searchDev, 1000)
+        } else if (refreshMode.value === 2) {
+          searchInterval.value = setInterval(searchDev, 5000)
+        } else if (refreshMode.value === 3) {
+          searchInterval.value = setInterval(searchDev, 10000)
+        }
+      }
+  )
+})
+
 </script>
 
 <template>
   <SearchPane @search="searchDev">
+    <template v-slot:btn>
+      <el-select style="width: 150px" v-model="refreshMode" placeholder="请选择">
+        <el-option v-for="item in refreshOpt" :key="item.value" :label="item.label" :value="item.value">
+        </el-option>
+      </el-select>
+    </template>
     <SearchItem>
       <PDInput v-model="stationNo" description="站点号" placeholder="请输入站点号"></PDInput>
     </SearchItem>
@@ -266,7 +564,7 @@ const searchDev = async () => {
       <PDInput v-model="deviceNo" description="设备号" placeholder="请输入设备号"></PDInput>
     </SearchItem>
   </SearchPane>
-  <h2>GSM_2G_Cell_Info</h2>
+  <h2>GSM 2G蜂窝信息</h2>
   <div style="height: 400px">
     <BarChart :source="GSM2GCellChartInfos"
               :dimensions="['idx', 'RxLev']"></BarChart>
@@ -304,12 +602,12 @@ const searchDev = async () => {
     </el-table-column>
     <el-table-column prop="timestamp" label="时间">
       <template #default="scope">
-        {{ scope.row.PLMN?.timestamp }}
+        {{ scope.row.time === '1970/1/1 08:00:00' ? '' : scope.row.time }}
       </template>
     </el-table-column>
   </el-table>
 
-  <h2>GSM_3G_Cell_Info</h2>
+  <h2>WCDMA 3G蜂窝信息</h2>
   <div style="height: 400px">
     <BarChart :source="GSM3GCellChartInfos"
               :dimensions="['idx', 'Rscp']"></BarChart>
@@ -357,13 +655,13 @@ const searchDev = async () => {
     </el-table-column>
     <el-table-column prop="timestamp" label="时间">
       <template #default="scope">
-        {{ scope.row.PLMN?.timestamp }}
+        {{ scope.row.time === '1970/1/1 08:00:00' ? '' : scope.row.time }}
       </template>
     </el-table-column>
   </el-table>
 
 
-  <h2>LTE_4G_Cell_Info</h2>
+  <h2>LTE 4G蜂窝信息</h2>
   <div style="height: 400px">
     <BarChart :source="GSM4GCellChartInfos"
               :dimensions="['idx', 'Rsrp']"></BarChart>
@@ -407,11 +705,11 @@ const searchDev = async () => {
     </el-table-column>
     <el-table-column prop="timestamp" label="时间">
       <template #default="scope">
-        {{ scope.row.PLMN?.timestamp }}
+        {{ scope.row.time === '1970/1/1 08:00:00' ? '' : scope.row.time }}
       </template>
     </el-table-column>
   </el-table>
-  <h2>NR_5G_4G_Cell_Info</h2>
+  <h2>NR 5G蜂窝信息</h2>
   <div style="height: 400px">
     <BarChart :source="NR5GCellChartInfos"
               :dimensions="['idx', 'Rsrp']"></BarChart>
@@ -454,13 +752,13 @@ const searchDev = async () => {
     </el-table-column>
     <el-table-column prop="timestamp" label="时间">
       <template #default="scope">
-        {{ scope.row.PLMN?.timestamp }}
+        {{ scope.row.time === '1970/1/1 08:00:00' ? '' : scope.row.time }}
       </template>
     </el-table-column>
 
   </el-table>
-  <h2>WIFI_Cell_Info</h2>
-   <div style="height: 400px">
+  <h2>WIFI信息</h2>
+  <div style="height: 400px">
     <BarChart :source="WIFI_Cell_ChartInfos"
               :dimensions="['idx', 'Indicator']"></BarChart>
   </div>
@@ -492,7 +790,7 @@ const searchDev = async () => {
     </el-table-column>
     <el-table-column prop="timestamp" label="时间">
       <template #default="scope">
-        {{ scope.row.Indicator?.timestamp }}
+        {{ scope.row.time === '1970/1/1 08:00:00' ? '' : scope.row.time }}
       </template>
     </el-table-column>
   </el-table>

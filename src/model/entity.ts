@@ -19,6 +19,7 @@ export interface DataCell {
 }
 
 export interface GSM2GCellInfo {
+    time?:string
     idx?: number,
     PLMN?: DataCell,
     Lac?: DataCell,
@@ -28,6 +29,7 @@ export interface GSM2GCellInfo {
 }
 
 export interface GSM3GCellInfo {
+    time?:string
     idx?: number,
     PLMN?: DataCell,
     Lac?: DataCell,
@@ -40,6 +42,7 @@ export interface GSM3GCellInfo {
 }
 
 export interface GSM4GCellInfo {
+    time?:string
     idx?: number,
     PLMN?: DataCell,
     CellID?: DataCell,
@@ -50,6 +53,7 @@ export interface GSM4GCellInfo {
 }
 
 export interface NR5G4GCellInfo {
+    time?:string
     idx?: number,
     PLMN?: DataCell,
     Band?: DataCell,
@@ -61,6 +65,7 @@ export interface NR5G4GCellInfo {
 }
 
 export interface WIFI_Cell_Info {
+    time?:string
     idx?: number,
     CH?: DataCell,
     SSID?: DataCell,

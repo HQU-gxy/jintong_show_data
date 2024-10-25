@@ -2,16 +2,16 @@
   <el-container style="width: 100%">
     <el-main style="width: 100%">
 
-      <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-        <el-tab-pane label="表格" name="table">
-          <app-table/>
-        </el-tab-pane>
-        <el-tab-pane label="图表" name="chart">
-          <div style="height: 800px">
-            <BarChart/>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
+      <app-table/>
+<!--      <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">-->
+<!--        <el-tab-pane label="表格" name="table">-->
+<!--        </el-tab-pane>-->
+<!--        <el-tab-pane label="图表" name="chart">-->
+<!--          <div style="height: 800px">-->
+<!--            <BarChart/>-->
+<!--          </div>-->
+<!--        </el-tab-pane>-->
+<!--      </el-tabs>-->
     </el-main>
   </el-container>
   <div class="container">

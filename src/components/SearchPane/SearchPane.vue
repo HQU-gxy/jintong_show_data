@@ -8,7 +8,9 @@
         <div class="pane">
           <slot />
           <search-item class="btn-group">
+            <slot name="btn" />
             <el-button
+                style="margin-left: 10px"
               type="primary"
               size="default"
               @click="emit('search')"
@@ -18,6 +20,7 @@
             </el-button>
 
             <el-button
+                style="margin-left: 10px"
               type="primary"
               size="default"
               @click="emit('reset')"
@@ -60,7 +63,8 @@ const emit = defineEmits(['search', 'reset'])
   transition: height 0.5s;
 }
 .btn-group {
-  flex-direction: row-reverse;
+  display: flex;
+  //flex-direction: row-reverse;
   margin-left: auto;
 }
 </style>

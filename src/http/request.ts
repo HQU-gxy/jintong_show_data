@@ -39,7 +39,7 @@ const hideLoading = () => {
 // 请求拦截
 service.interceptors.request.use(
   (config) => {
-    showLoading()
+    // showLoading()
     // 是否需要设置 token放在请求头
     config.headers['Authorization'] = 'Bearer ' + getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
     // get请求映射params参数
@@ -76,7 +76,7 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (res: any) => {
-    hideLoading()
+    // hideLoading()
 
     if (res.headers['content-type'] === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
       console.log(res.headers['Content-disposition'])
@@ -118,7 +118,7 @@ service.interceptors.response.use(
   },
   (error) => {
     console.log('err' + error)
-    hideLoading()
+    // hideLoading()
     let { message } = error
     if (message == 'Network Error') {
       message = '后端接口连接异常'
