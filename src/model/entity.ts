@@ -11,8 +11,8 @@ export interface Result {
 
 export interface DataCell {
     lable: string;
-    value: string;
-    timestamp: string;
+    value?: string;
+    timestamp?: string;
     data_type: number;
     max_size: number;
     name: string;
@@ -56,6 +56,7 @@ export interface NR5G4GCellInfo {
     Arfcn?: DataCell,
     Pcid?: DataCell,
     Rsrp?: DataCell,
+    Rsrq?: DataCell,
     Sinr?: DataCell,
 }
 

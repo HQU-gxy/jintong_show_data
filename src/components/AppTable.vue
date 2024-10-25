@@ -187,6 +187,8 @@ const getNR5G4GCellInfos = () => {
     } else if (prefix === '068') {
       result[idx].Rsrp = item;
     } else if (prefix === '069') {
+      result[idx].Rsrq = item;
+    } else if (prefix === '06A') {
       result[idx].Sinr = item;
     }
   }
@@ -213,13 +215,13 @@ const getWIFI_Cell_Infos = () => {
         Indicator: undefined,
       };
     }
-    if (prefix === '06A') {
+    if (prefix === '06B') {
       result[idx].CH = item;
-    } else if (prefix === '06B') {
-      result[idx].SSID = item;
     } else if (prefix === '06C') {
-      result[idx].BSSID = item;
+      result[idx].SSID = item;
     } else if (prefix === '06D') {
+      result[idx].BSSID = item;
+    } else if (prefix === '06E') {
       result[idx].Indicator = item;
     }
   }
